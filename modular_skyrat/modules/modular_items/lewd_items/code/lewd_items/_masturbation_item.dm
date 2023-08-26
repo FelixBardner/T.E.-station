@@ -28,7 +28,7 @@
 	else if(penis.aroused != AROUSAL_FULL)
 		to_chat(user, span_notice("You need to be aroused in order to masturbate."))
 		return
-	var/cum_volume = testicles.genital_size ** CUM_VOLUME_EXPONENT
+	var/cum_volume = ( testicles.genital_size ) ** CUM_VOLUME_EXPONENT
 	if(target == user)
 		user.visible_message(span_warning("[user] starts masturbating onto [target.p_them()]self!"), span_danger("You start masturbating onto yourself!"))
 
@@ -41,12 +41,14 @@
 		user.visible_message(span_warning("[user] starts masturbating onto [target]!"), span_danger("You start masturbating onto [target]!"))
 
 	if(do_after(user, 6 SECONDS, target))
+		var/datum/reagents/applied_reagents = new/datum/reagents( 10 ** 100 )
+		applied_reagents.add_reagent(/datum/reagent/consumable/cum, cum_volume)
+
 		if(target == user)
 			user.visible_message(span_warning("[user] cums on [target.p_them()]self!"), span_danger("You cum on yourself!"))
+			chem_splash(get_turf(target), null, 3, applied_reagents )
 
 		else if(target.is_refillable() && target.is_drainable())
-			var/datum/reagents/applied_reagents = new/datum/reagents(200)
-			applied_reagents.add_reagent(/datum/reagent/consumable/cum, cum_volume)
 			user.visible_message(span_warning("[user] cums into [target]!"), span_danger("You cum into [target]!"))
 			playsound(target, SFX_DESECRATION, 50, TRUE, ignore_walls = FALSE)
 			applied_reagents.trans_to(target, cum_volume)
@@ -54,6 +56,7 @@
 			user.visible_message(span_warning("[user] cums on [target]!"), span_danger("You cum on [target]!"))
 			playsound(target, SFX_DESECRATION, 50, TRUE, ignore_walls = FALSE)
 			affected_human.add_cum_splatter_floor(get_turf(target))
+			chem_splash(get_turf(target), null, 3, applied_reagents )
 
 		log_combat(user, target, "came on")
 		if(prob(40))
